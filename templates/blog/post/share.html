@@ -1,0 +1,28 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Share {{ post.title }}{% endblock %}
+
+{% block content %}
+    {% if sent %}
+        <div class="success-message">
+            <span aria-hidden="true">✓</span>
+            <div>
+                <h1>Email yuborildi</h1>
+                <p>“{{ post.title }}” maqolasi muvaffaqiyatli jo‘natildi.</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="article-heading share-heading">
+            <span class="eyebrow">ULASHISH</span>
+            <h1>Maqolani email orqali yuboring</h1>
+            <p>“{{ post.title }}”</p>
+        </div>
+        <section class="form-card">
+            <form method="post">
+                {{ form.as_p }}
+                {% csrf_token %}
+                <input type="submit" value="Email yuborish">
+            </form>
+        </section>
+    {% endif %}
+{% endblock %}

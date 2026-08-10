@@ -1,3 +1,245 @@
-from django.shortcuts import render
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, render, redirect
+from .forms import CommentForm, LoginForm, CustomUserCreationForm, UserAccountForm, ChangePasswordForm
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.urls import reverse_lazy
+from django.views import generic
+from .forms import EmailPostForm
+from .models import Post, Comment
+from django.views.generic import ListView
+from django.contrib import messages
 
-# Create your views here.
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('blog_app:post_list')
+    
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('blog_app:post_list')
+            else:
+                messages.error(request, 'Foydalanuvchi nomi yoki parol noto\'g\'ri!')
+    else:
+        form = LoginForm()
+    
+    return render(request, 'blog/auth/login.html', {'form': form})
+
+def logout_page(request):
+    logout(request)
+    return redirect('blog_app:post_list')
+
+class SignUpView(generic.CreateView):
+    form_class = CustomUserCreationForm
+    success_url = reverse_lazy("blog_app:login_page")
+    template_name = "blog/auth/signup.html"
+
+@login_required(login_url='blog_app:login_page')
+def account_settings(request):
+    if request.method == 'POST':
+        user_form = UserAccountForm(request.POST, instance=request.user)
+        if user_form.is_valid():
+            user_form.save()
+            messages.success(request, 'Profil muvaffaqiyatli yangilandi!')
+            return redirect('blog_app:account_settings')
+    else:
+        user_form = UserAccountForm(instance=request.user)
+    
+    return render(request, 'blog/auth/account_settings.html', {'user_form': user_form})
+
+@login_required(login_url='blog_app:login_page')
+def change_password(request):
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data['old_password']
+            new_password1 = form.cleaned_data['new_password1']
+            new_password2 = form.cleaned_data['new_password2']
+            
+            if not request.user.check_password(old_password):
+                messages.error(request, 'Eski parol noto\'g\'ri!')
+            elif new_password1 != new_password2:
+                messages.error(request, 'Yangi parollar mos kelmadi!')
+            elif len(new_password1) < 8:
+                messages.error(request, 'Parol kamida 8 ta belgidan iborat bo\'lishi kerak!')
+            else:
+                request.user.set_password(new_password1)
+                request.user.save()
+                messages.success(request, 'Parol muvaffaqiyatli o\'zgartirildi!')
+                return redirect('blog_app:login_page')
+    else:
+        form = ChangePasswordForm()
+    
+    return render(request, 'blog/auth/change_password.html', {'form': form})
+
+class PostListView(ListView):
+    queryset = Post.published.all()
+    context_object_name = 'posts'
+    paginate_by = 3
+    template_name = 'blog/post/list.html'
+
+def post_detail(request, year, month, day, slug, comment_form=None):
+    post = get_object_or_404(Post, slug=slug, status='published', publish__year=year, publish__month=month, publish__day=day)
+    comments = post.comments.filter(active=True)
+    new_comment = None
+
+    if request.method == 'POST':
+        comments_form = CommentForm(data=request.POST)
+        if comments_form.is_valid():
+            new_comment = comments_form.save(commit=False)
+            new_comment.post = post
+            new_comment.save()
+    else:
+        comment_form = CommentForm()
+    
+    return render(request, 'blog/post/detail.html', {'comments': comments, 'new_comment': new_comment, 'comment_form': comment_form, 'post': post})
+
+def post_share(request, post_id):
+    post = get_object_or_404(Post, id=post_id, status='published')
+    sent = False
+
+    if request.method == 'POST':
+        form = EmailPostForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            post_url = request.build_absolute_uri(post.get_absolute_url())
+            title = f"{cd['name']} recommends you read {post.title}"
+            message = (
+                f"Read {post.title} at {post_url}\n\n"
+                f"{cd['name']}'s comments: {cd['comments']}"
+            )
+            send_mail(title, message, cd['email'], [cd['to']], fail_silently=False)
+            sent = True
+    else:
+        form = EmailPostForm()
+
+    return render(
+        request,
+        'blog/post/share.html',
+        {'post': post, 'form': form, 'sent': sent},
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class PostListView(ListView):
+    queryset = Post.published.all()
+    context_object_name = 'posts'
+    paginate_by = 3
+    template_name = 'blog/post/list.html'
+
+
+
+def post_detail(request, year, month, day, slug, comment_form=None):
+    post = get_object_or_404(Post, slug=slug,status='published',publish__year=year,publish__month=month,publish__day=day)
+    comments = post.comments.filter(active=True)
+    new_comment = None
+
+    if request.method == 'POST':
+         comments_form = CommentForm(data= request.POST)
+         if comments_form.is_valid():
+             new_comment = comments_form.save(commit=False)
+             new_comment.post = post
+             new_comment.save()
+    else:
+             comment_form = CommentForm()
+    return  render(request,'blog/post/detail.html', {'comments':comments,'new_comment':new_comment,'comment_form':comment_form,'post':post})
+
+
+
+
+
+
+
+
+def post_share(request, post_id):
+    post = get_object_or_404(Post, id=post_id, status='published')
+    sent = False
+
+    if request.method == 'POST':
+        form = EmailPostForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            post_url = request.build_absolute_uri(post.get_absolute_url())
+            title = f"{cd['name']} recommends you read {post.title}"
+            message = (
+                f"Read {post.title} at {post_url}\n\n"
+                f"{cd['name']}'s comments: {cd['comments']}"
+            )
+            send_mail(title, message, cd['email'], [cd['to']],fail_silently=False)
+            sent = True
+    else:
+        form = EmailPostForm()
+
+    return render(
+        request,
+        'blog/post/share.html',
+        {'post': post, 'form': form, 'sent': sent},
+    )

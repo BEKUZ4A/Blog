@@ -1,0 +1,72 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}Akkaunt Sozlamalari - IT-NEWS{% endblock %}
+
+{% block content %}
+<div class="account-container">
+    <div class="page-heading">
+        <h1>Akkaunt Sozlamalari</h1>
+        <p>Profil ma'lumotlarini tahrirlash</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="account-card">
+        <h2>Profil Ma'lumotlari</h2>
+        <form method="post" class="form-card">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                {{ user_form.username.label_tag }}
+                {{ user_form.username }}
+                {% if user_form.username.errors %}
+                    <div class="error-message">{{ user_form.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ user_form.first_name.label_tag }}
+                {{ user_form.first_name }}
+                {% if user_form.first_name.errors %}
+                    <div class="error-message">{{ user_form.first_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ user_form.last_name.label_tag }}
+                {{ user_form.last_name }}
+                {% if user_form.last_name.errors %}
+                    <div class="error-message">{{ user_form.last_name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ user_form.email.label_tag }}
+                {{ user_form.email }}
+                {% if user_form.email.errors %}
+                    <div class="error-message">{{ user_form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-primary">Saqlash</button>
+        </form>
+    </div>
+
+    <div class="account-card">
+        <h2>Parolni O'zgartirish</h2>
+        <p><a href="{% url 'blog_app:change_password' %}" class="btn-link">Parolni o'zgartirish →</a></p>
+    </div>
+
+    <div class="account-actions">
+        <a href="{% url 'blog_app:post_list' %}" class="btn-secondary">Orqaga</a>
+        <a href="{% url 'blog_app:logout_page' %}" class="btn-secondary btn-danger">Chiqish</a>
+    </div>
+</div>
+{% endblock %}

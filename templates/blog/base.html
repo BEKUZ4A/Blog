@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}IT-NEWS{% endblock %}</title>
+    <link href="{% static 'css/blog.css' %}" rel="stylesheet">
+    <link href="{% static 'css/auth.css' %}" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="{% url 'blog_app:post_list' %}">
+        <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
+        <span class="brand-copy">
+            <strong>IT-NEWS</strong>
+            <small>Texnologiya blogi</small>
+        </span>
+    </a>
+    <div class="header-nav">
+        {% if user.is_authenticated %}
+            <span class="user-welcome">{{ user.first_name|default:user.username }}</span>
+            <a href="{% url 'blog_app:account_settings' %}" class="nav-link" title="Profil sozlamalari">⚙️</a>
+            <a href="{% url 'blog_app:logout_page' %}" class="nav-link">Chiqish</a>
+        {% else %}
+            <a href="{% url 'blog_app:login_page' %}" class="nav-link">Kirish</a>
+            <a href="{% url 'blog_app:signup_page' %}" class="nav-link">Ro'yxatdan o'tish</a>
+        {% endif %}
+    </div>
+</header>
+
+<main class="site-layout">
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+    <aside id="sidebar">
+        <span class="sidebar-kicker">BLOG HAQIDA</span>
+        <h2>IT-Yangiliklar</h2>
+        <p>Informatsion texnologiyalarga oid xabarlar.</p>
+    </aside>
+</main>
+</body>
+</html>

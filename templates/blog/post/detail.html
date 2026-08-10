@@ -1,0 +1,62 @@
+{% extends 'blog/base.html' %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+    <div class="article-heading">
+        <span class="eyebrow">MAQOLA</span>
+        <h1>{{ post.title }}</h1>
+        <p class="date">
+            published {{ post.publish }} by {{ post.author }}
+        </p>
+    </div>
+
+    <p class="article-actions">
+        <a class="share-link" href="{% url 'blog_app:post_share' post.id %}">
+            Email orqali ulashish
+        </a>
+    </p>
+
+    <section class="comments-section">
+        <div class="section-title">
+            <span class="section-icon" aria-hidden="true">✦</span>
+            <h2>Fikrlar</h2>
+        </div>
+        {% with comments.count as total_comments %}
+        <h2>
+            {{ total_comments }} comment{{ total_comments|pluralize }}
+        </h2>
+        {% endwith %}
+        {% for comment in comments %}
+            <article class="comment">
+                <p class="info">
+                    <span>#{% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}</span>
+                    {{ comment.name }} · {{ comment.created }}
+                </p>
+                {{ comment.body|linebreaks }}
+            </article>
+        {% empty %}
+            <p class="empty-state">Hozircha fikrlar yo‘q. Birinchi bo‘lib fikr bildiring.</p>
+        {% endfor %}
+    </section>
+
+    {% if new_comment %}
+        <div class="success-message">
+            <span aria-hidden="true">✓</span>
+            <div>
+                <h2>Fikringiz qo‘shildi</h2>
+                <p>U maqola ostida ko‘rinadi.</p>
+            </div>
+        </div>
+    {% else %}
+        <section class="form-card">
+            <div class="section-title">
+                <span class="section-icon" aria-hidden="true">+</span>
+                <h2>Fikr qoldiring</h2>
+            </div>
+            <form method="post">
+                {{ comment_form.as_p }}
+                {% csrf_token %}
+                <input type="submit" value="Fikr yuborish">
+            </form>
+        </section>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block title %}Kirish - IT-NEWS{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="page-heading">
+        <h1>Akkauntga Kirish</h1>
+        <p>IT-Yangiliklar platformasiga xush kelibsiz</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-error{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" class="form-card">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="error-message">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="error-message">{{ form.password.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn-primary">Kirish</button>
+    </form>
+
+    <div class="auth-footer">
+        <p>Akkaunt yo'qmi? <a href="{% url 'blog_app:signup_page' %}">Ro'yxatdan o'ting</a></p>
+    </div>
+</div>
+{% endblock %}

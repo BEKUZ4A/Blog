@@ -1,0 +1,26 @@
+{% extends 'blog/base.html' %}
+{% block title %}IT-NEWS{% endblock %}
+{% block content %}
+    <div class="page-heading">
+        <span class="eyebrow">YANGILIKLAR OQIMI</span>
+        <h1>IT-NEWS</h1>
+        <p>Texnologiya olamidagi so‘nggi maqolalar.</p>
+    </div>
+
+    <div class="post-list">
+        {% for post in posts %}
+            <article class="post">
+                <h2>
+                    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                </h2>
+                <p class="date">
+                    published {{ post.publish }} by {{ post.author }}
+                </p>
+            </article>
+        {% empty %}
+            <p class="empty-state">Hozircha e’lon qilingan maqolalar yo‘q.</p>
+        {% endfor %}
+    </div>
+
+    {% include "paginator.html" with page=page_obj %}
+{% endblock %}
